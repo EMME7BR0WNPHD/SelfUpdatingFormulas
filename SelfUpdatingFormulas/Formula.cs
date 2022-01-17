@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -68,6 +70,14 @@ namespace SelfUpdatingFormulas
 
             public override Expression Visit(Expression node)
             {
+                VisitArrayItems(node);
+                VisitRegularItems(node);
+
+                return base.Visit(node);
+            }
+
+            private void VisitRegularItems(Expression node)
+            {
                 if (node is MemberExpression member && member.Type.GetInterfaces().Contains(typeof(IMutableVariable)))
                 {
                     var objectMember = Expression.Convert(member, typeof(object));
@@ -85,7 +95,35 @@ namespace SelfUpdatingFormulas
                         }
                     }
                 }
-                return base.Visit(node);
+            }
+
+            private void VisitArrayItems(Expression node)
+            {
+                if (node is MemberExpression me)
+                {
+                    var type = me.Type;
+                    if (type.IsArray && type.GetElementType().GetInterfaces().Contains(typeof(IMutableVariable)))
+                    {
+                        var objectMember = Expression.Convert(me, typeof(object));
+                        var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+                        var getter = getterLambda.Compile();
+                        var o = getter();
+                        if (o is IEnumerable ienumerable)
+                        {
+                            foreach (var variable in ienumerable.OfType<IMutableVariable>())
+                            {
+                                if (_subscribe)
+                                {
+                                    variable.Changed += _changed;
+                                }
+                                else
+                                {
+                                    variable.Changed -= _changed;
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

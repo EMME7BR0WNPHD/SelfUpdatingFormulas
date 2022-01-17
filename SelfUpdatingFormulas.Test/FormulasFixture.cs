@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 
@@ -77,6 +79,26 @@ namespace SelfUpdatingFormulas.Test
             var argument2 = new MutableVariable<int>(3);
             var max = new MutableVariable<int>(default);
             max.SetCalculationFormula(() => Math.Max(argument2, argument1));
+
+            int result = 0;
+
+            max.Changed += delegate { result = max.Value; };
+
+            argument1.Value = 5;
+            Assert.That(result, Is.EqualTo(5));
+
+            argument2.Value = 10;
+            Assert.That(result, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void TestFormulaWithArray()
+        {
+            var argument1 = new MutableVariable<int>(2);
+            var argument2 = new MutableVariable<int>(3);
+            var array = new [] { argument1, argument2 };
+            var max = new MutableVariable<int>(default);
+            max.SetCalculationFormula(() => array.Max(x => x.Value));
 
             int result = 0;
 
