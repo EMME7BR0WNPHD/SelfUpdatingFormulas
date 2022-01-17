@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -72,7 +74,7 @@ namespace SelfUpdatingFormulas
             {
                 VisitArrayItems(node);
                 VisitRegularItems(node);
-
+                VisitObservableCollection(node);
                 return base.Visit(node);
             }
 
@@ -95,6 +97,66 @@ namespace SelfUpdatingFormulas
                         }
                     }
                 }
+            }
+
+            private void VisitObservableCollection(Expression node)
+            {
+                if (node is MemberExpression me)
+                {
+                    var type = me.Type;
+                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ObservableCollection<>))
+                    {
+                        var objectMember = Expression.Convert(me, typeof(object));
+                        var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+                        var getter = getterLambda.Compile();
+                        var o = getter();
+                        if (o is INotifyCollectionChanged iNotifyCollectionChanged)
+                        {
+                            if (_subscribe)
+                            {
+                                iNotifyCollectionChanged.CollectionChanged += ObservableCollectionChanged;
+                            }
+                            else
+                            {
+                                iNotifyCollectionChanged.CollectionChanged += ObservableCollectionChanged;
+                            }
+                        }
+                        if (o is IEnumerable ienumerable)
+                        {
+                            foreach (var variable in ienumerable.OfType<IMutableVariable>())
+                            {
+                                if (_subscribe)
+                                {
+                                    variable.Changed += _changed;
+                                }
+                                else
+                                {
+                                    variable.Changed -= _changed;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            private void ObservableCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+            {
+                if (e.OldItems != null)
+                {
+                    foreach (var oldItem in e.OldItems.OfType<IMutableVariable>())
+                    {
+                        oldItem.Changed -= _changed;
+                    }
+                }
+
+                if (e.NewItems != null)
+                {
+                    foreach (var newItem in e.NewItems.OfType<IMutableVariable>())
+                    {
+                        newItem.Changed += _changed;
+                    }
+                }
+                _changed?.Invoke(this, EventArgs.Empty);
             }
 
             private void VisitArrayItems(Expression node)

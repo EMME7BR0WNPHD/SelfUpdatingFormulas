@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
@@ -109,6 +110,26 @@ namespace SelfUpdatingFormulas.Test
 
             argument2.Value = 10;
             Assert.That(result, Is.EqualTo(10));
+        }
+
+        [Test]
+        public void TestFormulaWithObservableCollection()
+        {
+            var argument1 = new MutableVariable<int>(2);
+            var argument2 = new MutableVariable<int>(3);
+            var argument3 = new MutableVariable<int>(5);
+            var observable = new ObservableCollection<MutableVariable<int>> {argument1, argument2};
+            var max = new MutableVariable<int>(default);
+            max.SetCalculationFormula(() => observable.Max(x => x.Value));
+
+            int result = max.Value;
+
+            max.Changed += delegate { result = max.Value; };
+
+            Assert.That(result, Is.EqualTo(3));
+
+            observable.Add(argument3);
+            Assert.That(result, Is.EqualTo(5));
         }
 
         [Test]
