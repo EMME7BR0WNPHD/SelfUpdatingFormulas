@@ -3,24 +3,24 @@ A lightweight framework, that allows to create mutable variables and arrange the
 
 Given classes help developing in cases when dealing with multiple interrelated variables.
 As an example, let's consider the application, that helps plan the trip.
-	We have the next set of variable:
-Distance D
-Fuel tank capacity T
-Fuel consumption FC
-Fuel economy FE
-Amount of fuelt that is necessary for the whole trip V
-Distance that could be covered in one tank DpT
-Number of refills R
+	We have the next set of variable:<br />
+Distance D<br />
+Fuel tank capacity T<br />
+Fuel consumption FC<br />
+Fuel economy FE<br />
+Amount of fuelt that is necessary for the whole trip V<br />
+Distance that could be covered in one tank DpT<br />
+Number of refills R<br />
 
 Amoung them there are variables, that does not depend upon any other - only user could set the value: T, D.
-Another ones could be calculated:
-DpT = T / FC
-V = D * FC
-R = V / T
+Another ones could be calculated:<br />
+DpT = T / FC<br />
+V = D * FC<br />
+R = V / T<br />
 
-There are also others, that could be both set up by the user or calculated: FC, FE.
-FC = 1/FE
-FE = 1/FC
+There are also others, that could be both set up by the user or calculated: FC, FE.<br />
+FC = 1/FE<br />
+FE = 1/FC<br />
 
 Writing such a code that reacts on changes of variables and calculates all dependent ones could be difficult, and the resulting code itself could be complicated, error-prone (e.g. FE/FC calculations could cause looping). And even if the code is written, debugged and tested, any modification, or adding a new variable, could turn out a serious challenge.
 
