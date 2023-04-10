@@ -91,3 +91,12 @@ SelfUpdatingFormulas/obj/SelfUpdatingFormulas.csproj.nuget.g.props
 SelfUpdatingFormulas/obj/SelfUpdatingFormulas.csproj.nuget.g.targets
 SelfUpdatingFormulas.sln.DotSettings.user
 .vs/SelfUpdatingFormulas/v16/.suo
+/.vs
+/packages
+/ExampleApp/bin
+/ExampleApp/obj
+/SelfUpdatingFormulas/.vs
+/SelfUpdatingFormulas/bin
+/SelfUpdatingFormulas/obj
+/SelfUpdatingFormulas.Test/bin
+/SelfUpdatingFormulas.Test/obj
